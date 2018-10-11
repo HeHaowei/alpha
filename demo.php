@@ -1,46 +1,45 @@
-<!DOCTYPE html>  
+<!DOCTYPE html>
 <head>
-  <title>UPDATE PostgreSQL data with PHP</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <style>li {list-style: none;}</style>
+    <title>UPDATE PostgreSQL data with PHP</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style>li {list-style: none;}</style>
 </head>
 <body>
-  <h2>Supply bookid and enter</h2>
-  <ul>
-    <form name="display" action="demo.php" method="POST" >
-      <li>Book ID:</li>
-      <li><input type="text" name="bookid" /></li>
-      <li><input type="submit" name="submit" /></li>
+<h2>Our current on-going projects</h2>
+<ul>
+    <form name="display" action="BrowseProjects.php" method="POST" >
     </form>
-  </ul>
-  <?php
-  	// Connect to the database. Please change the password in the following line accordingly
-    $db     = pg_connect("host=localhost port=5432 dbname=Project1 user=postgres password=test");	
-    $result = pg_query($db, "SELECT * FROM book where book_id = '$_POST[bookid]'");		// Query template
-    $row    = pg_fetch_assoc($result);		// To store the result row
-    if (isset($_POST['submit'])) {
-        echo "<ul><form name='update' action='demo.php' method='POST' >  
-    	<li>Book ID:</li>  
-    	<li><input type='text' name='bookid_updated' value='$row[book_id]' /></li>  
-    	<li>Book Name:</li>  
-    	<li><input type='text' name='book_name_updated' value='$row[name]' /></li>  
-    	<li>Price (USD):</li><li><input type='text' name='price_updated' value='$row[price]' /></li>  
-    	<li>Date of publication:</li>  
-    	<li><input type='text' name='dop_updated' value='$row[date_of_publication]' /></li>  
-    	<li><input type='submit' name='new' /></li>  
-    	</form>  
-    	</ul>";
-    }
-    if (isset($_POST['new'])) {	// Submit the update SQL command
-        $result = pg_query($db, "UPDATE book SET book_id = '$_POST[bookid_updated]',  
-    name = '$_POST[book_name_updated]',price = '$_POST[price_updated]',  
-    date_of_publication = '$_POST[dop_updated]'");
-        if (!$result) {
-            echo "Update failed!!";
-        } else {
-            echo "Update successful!";
-        }
-    }
-    ?>  
+</ul>
+
+
+<?php
+// Connect to the database. Please change the password in the following line accordingly
+$db       = pg_connect("host=localhost port=5432 dbname=postgres user=postgres password=test");
+$funded   = pg_query($db, 'SELECT Project_id, title, category, total_amount FROM publish_projects WHERE current_amount >= total_amount');
+$unfunded = pg_query($db, 'SELECT Project_id, title, category, total_amount, total_amount - current_amount AS shortage FROM publish_projects WHERE current_amount < total_amount ORDER BY shortage');
+
+if(!$funded or !$unfunded){
+    echo 'An error occurred.\n';
+    exit;
+}
+
+$number_funded =pg_query($db, 'SELECT COUNT(*) FROM publish_projects WHERE current_amount >=total_amount');
+$number_unfunded = pg_query($db, 'SELECT COUNT(*) FROM publish_projects WHERE current_amount<total_amount');
+$average_shortage = pg_query($db, 'SELECT AVG (total_amount - current_amount) FROM publish_projects WHERE current_amount<total_amount');
+
+$funded =  pg_fetch_all($funded);
+$unfunded = pg_fetch_all($unfunded);
+
+echo "<h2> Projects seeking fund</h2>";
+echo "number of projects: ";//.$number_unfunded."<br>";
+echo "average money needed: ";//.$average_shortage."<br>";
+print_r($unfunded);
+
+echo "<h2> Funded Projects</h2>";
+echo "number of funded projects: ";//.$number_funded."<br>";
+print_r($funded);
+
+?>
+
 </body>
 </html>
