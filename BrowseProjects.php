@@ -16,7 +16,7 @@
   	// Connect to the database. Please change the password in the following line accordingly
     $db       = pg_connect("host=localhost port=5432 dbname=postgres user=postgres password=test");
     $funded   = pg_query($db, 'SELECT Project_id, title, category, total_amount FROM publish_projects WHERE current_amount >= total_amount');
-    $unfunded = pg_query($db, 'SELECT Project_id, title, category, total_amount, total_amount - current_amount AS shortage FROM publish_projects WHERE current_amount < total_amount ORDER BY shortage')
+    $unfunded = pg_query($db, 'SELECT Project_id, title, category, total_amount, total_amount - current_amount AS shortage FROM publish_projects WHERE current_amount < total_amount ORDER BY shortage');
 
     if(!$funded or !$unfunded){
     	echo 'An error occurred.\n';
